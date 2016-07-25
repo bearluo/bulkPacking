@@ -1,3 +1,4 @@
 batch/apk/*
 batch/bin
 batch/lib/*.properties
+batch/package/*
