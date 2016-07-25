@@ -1,0 +1,2 @@
+PhpConfig.APPID_360 PhpConfig.APPKEY_360 PhpConfig.BID_360 360 release 100316
+PhpConfig.APPID_ALI PhpConfig.APPKEY_ALI PhpConfig.BID_ALI ali release 100811
