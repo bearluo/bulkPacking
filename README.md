@@ -1,7 +1,7 @@
 #bulkPacking
 批量打包
 ##配置环境
-
+https://github.com/shwenzhang/AndResGuard
 apktool:  https://ibotpeaches.github.io/Apktool/    用于反编译apk包 和 重新打包
 android sdk: 这个是用于对apk进行对齐操作的··· sdk\build-tools\19.1.0\zipalign.exe
 jdk: 这个是用于对apk包进行签名
