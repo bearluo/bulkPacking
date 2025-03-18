@@ -1,3 +1,7 @@
+#需要安装 
+jdk-8u181-windows-x64
+ant 环境
+
 #bulkPacking
 批量打包
 ##配置环境

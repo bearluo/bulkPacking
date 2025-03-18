@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="batch_package" default="help">
+	<property file="lib/local.properties"/>
+	<target name="auto-batch-decode">
+		<property file="lib/package.properties" />
+		<echo message="${apk.package.dir}" />
+		<echo message="${apk.package.name}" />
+		<fail
+            message="package.dir is missing."
+            unless="apk.package.dir"
+		/>
+		<delete dir="package"></delete>
+		<mkdir dir="package"/>
+		<echo message="${local.properties.apktool.dir}" />
+		<exec dir="${local.properties.apktool.dir}" executable="lib/apktool.bat">
+			<arg line="d -s -f -o package ${apk.package.dir}/${apk.package.name}"/>
+        </exec>
+	 </target>
+	 <target name="auto-batch-encode">
+		<property file="lib/ant.properties" />
+		<property file="lib/package.properties" />
+		<echo message="${apk.package.dir}" />
+		<echo message="${apk.package.name}" />
+		<!-- 解析AndroidManifest.xml 获得包名 -->
+        <xmlproperty file="${local.properties.apktool.dir}/package/AndroidManifest.xml" collapseAttributes="true" />
+		<!-- 构建文件build 所在目录 -->
+		<dirname property="auto.here.dir" file="${ant.file}" />
+		<property name="auto.package" value="${manifest.package}" />
+		<property name="auto.final.versionCode" value="${manifest.android:versionCode}" />
+		<property name="auto.final.versionName" value="${manifest.android:versionName}" />
+		<mkdir dir="${auto.here.dir}/apk/"/>
+		<property name="out.final.file"  
+            location="${apk.package.dir}/apk/${UMENG_CHANNEL}-${apk.package.name}" />
+		<!-- 修改OPERATORSID -->
+		<echo message="修改OPERATORSID: ${OPERATORSID}" />
+		<condition property="isNeedChangeOperatorsid">  
+            <isset property="OPERATORSID" />
+        </condition>  
+		<!--<antcall target="change-operatorsid">  
+        </antcall>  -->
+		<!-- 修改UMENG_CHANNEL -->
+		<echo message="修改UMENG_CHANNEL ${UMENG_CHANNEL}" />
+		<condition property="isNeedChangeUmengChannel">  
+            <isset property="UMENG_CHANNEL" />
+        </condition>	
+		<!-- <antcall target="change-umeng-channel">  
+        </antcall>-->
+		<delete dir="bin"></delete>
+		<!-- 打包 -->
+		<echo message="打包" />
+		<exec dir="${local.properties.apktool.dir}" executable="lib/apktool.bat">
+			<arg line="b -f -o bin/unalign.apk package"/>
+        </exec>
+		
+		<antcall target="alignapk">  
+        </antcall>
+		
+		<antcall target="signapk">  
+        </antcall>
+		
+		
+		<echo message="输出包 ${out.final.file}" />
+	 </target>
+	 
+	 <target name="signapk">
+		<!-- 打签名 -->
+		<echo message="打签名" />
+		<exec dir="${local.properties.apktool.dir}" executable="lib/signapk.bat">
+			<arg line="${out.final.file} bin/unsign.apk"/>
+        </exec>
+	 </target>
+	 
+	 <target name="alignapk">
+		<property name="out.final.file"  
+            location="bin/release.apk" />
+		<!-- zip对齐  googleplay 要求 -->
+		<echo message="zip对齐  googleplay 要求" />
+		<exec dir="${local.properties.apktool.dir}" executable="lib/align.bat">
+			<arg line="bin/unalign.apk bin/unsign.apk"/>
+        </exec>
+	 </target>
+	 
+	 <target name="change-umeng-channel" if="isNeedChangeUmengChannel">
+		<replaceregexp file="${local.properties.apktool.dir}/package/AndroidManifest.xml"
+			encoding="utf-8"
+			match="&lt;meta\-data(\s+)android:name=&quot;UMENG_CHANNEL&quot;(\s+)android:value=&quot;[a-zA-Z0-9_]+&quot;"
+			replace="&lt;meta\-data android:name=&quot;UMENG_CHANNEL&quot; android:value=&quot;${UMENG_CHANNEL}&quot;"
+        />
+		<replaceregexp file="${local.properties.apktool.dir}/package/AndroidManifest.xml"
+			encoding="utf-8"
+			match="&lt;meta\-data(\s+)android:name=&quot;BUGLY_APP_CHANNEL&quot;(\s+)android:value=&quot;[a-zA-Z0-9_]+&quot;"
+			replace="&lt;meta\-data android:name=&quot;BUGLY_APP_CHANNEL&quot; android:value=&quot;${UMENG_CHANNEL}&quot;"
+        />
+	 </target>
+	 <target name="change-operatorsid" if="isNeedChangeOperatorsid">
+		<replaceregexp file="${local.properties.apktool.dir}/package/AndroidManifest.xml"
+			encoding="utf-8"
+			match="&lt;meta\-data(\s+)android:name=&quot;OPERATORSID&quot;(\s+)android:value=&quot;[a-zA-Z0-9_]+&quot;"
+			replace="&lt;meta\-data android:name=&quot;OPERATORSID&quot; android:value=&quot;${OPERATORSID}&quot;"
+        />
+	 </target>
+	 <target name="help">
+		<echo message="ant auto-batch-decode 解析母包" />
+	 </target>
+	 
+	 <target name="change-xxl-name">
+		<replaceregexp file="${local.properties.apktool.dir}/package/res/values/strings.xml"
+			encoding="utf-8"
+			match="&lt;string name=&quot;app_name&quot;&gt;[a-zA-Z0-9_\u4e00-\u9fa5]+&lt;/string&gt;"
+			replace="&lt;string name=&quot;app_name&quot;&gt;爱玩牛大师&lt;/string&gt;"
+        />
+	 </target>
+	 <target name="change-name">
+		<replaceregexp file="${local.properties.apktool.dir}/package/res/values/strings.xml"
+			encoding="utf-8"
+			match="&lt;string name=&quot;app_name&quot;&gt;[a-zA-Z0-9_\u4e00-\u9fa5]+&lt;/string&gt;"
+			replace="&lt;string name=&quot;app_name&quot;&gt;爱玩斗地主&lt;/string&gt;"
+        />
+	 </target>
+	 
+	 <target name="change-name-by-input">
+		<input message="输入修改的应用名称"
+			addproperty="change_name"
+			defaultvalue="爱玩斗地主"
+			/>
+		<echo message="修改应用名称为： ${change_name}" />
+		<replaceregexp file="${local.properties.apktool.dir}/package/res/values/strings.xml"
+			encoding="utf-8"
+			match="&lt;string name=&quot;app_name&quot;&gt;[a-zA-Z0-9_\u4e00-\u9fa5]+&lt;/string&gt;"
+			replace="&lt;string name=&quot;app_name&quot;&gt;${change_name}&lt;/string&gt;"
+        />
+	 </target>
+	 <target name="change-ks-app-id-by-input">
+		<input message="输入修改的快手appid"
+			addproperty="ks_app_id"
+			defaultvalue="26501"
+			/>
+		<echo message="修改应用名称为： ${ks_app_id}" />
+		<replaceregexp file="${local.properties.apktool.dir}/package/AndroidManifest.xml"
+			encoding="utf-8"
+			match="&lt;meta\-data(\s+)android:name=&quot;ks_app_id&quot;(\s+)android:value=&quot;[a-zA-Z0-9_]+&quot;"
+			replace="&lt;meta\-data android:name=&quot;ks_app_id&quot; android:value=&quot;${ks_app_id}&quot;"
+        />
+		<input message="输入修改的快手appname"
+			addproperty="ks_app_name"
+			defaultvalue="aiwandoudizhu"
+			/>
+		<echo message="修改应用名称为： ${ks_app_name}" />
+		<replaceregexp file="${local.properties.apktool.dir}/package/AndroidManifest.xml"
+			encoding="utf-8"
+			match="&lt;meta\-data(\s+)android:name=&quot;ks_app_name&quot;(\s+)android:value=&quot;[a-zA-Z0-9_]+&quot;"
+			replace="&lt;meta\-data android:name=&quot;ks_app_name&quot; android:value=&quot;${ks_app_name}&quot;"
+        />
+	 </target>
+	 
+</project>

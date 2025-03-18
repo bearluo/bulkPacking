@@ -1,1 +1,0 @@
-D:\adt-bundle-windows-x86_64-20140702\sdk\build-tools\19.1.0\zipalign -f -v 4 %1 %2

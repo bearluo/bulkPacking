@@ -1,0 +1,2 @@
+call init.bat
+call %~dp0apksigner.bat sign -verbose --ks "%keyStorePath%" --v1-signing-enabled true --v2-signing-enabled true --ks-key-alias %keyAlias% --ks-pass pass:"%keyStorePassword%" --key-pass pass:"%keyStorePassword%" --out %1 %2
